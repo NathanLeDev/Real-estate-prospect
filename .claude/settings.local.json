@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /c/Users/natha/Documents/Real-estate-prospect/ log --oneline -10)",
+      "Bash(pip show:*)",
+      "Bash(pip --version)",
+      "Bash(pip list:*)",
+      "Bash(pip install:*)",
+      "Bash(python -c \"import anthropic, streamlit, pydantic, dotenv; print\\('All imports OK'\\)\")",
+      "Bash(python -c \"from models import ProspectInput, ProspectScore, GeographicOrigin, PropertyType; from scorer import score_prospect, _build_user_prompt; print\\('models + scorer OK'\\)\")",
+      "Bash(python -c ':*)",
+      "Bash(python -m py_compile main.py)",
+      "Bash(python -m py_compile scorer.py)",
+      "Bash(python -m py_compile models.py)",
+      "Bash(python -c \"from scorer import score_prospect, GROQ_MODEL; print\\('scorer OK — modèle:', GROQ_MODEL\\)\")",
+      "Bash(where streamlit:*)",
+      "Bash(python -m streamlit --version)",
+      "Bash(python3 -m streamlit --version)"
+    ]
+  }
+}

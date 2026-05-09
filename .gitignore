@@ -1,0 +1,19 @@
+# Clés API et secrets — ne jamais committer
+.env
+
+# Cache Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Environnements virtuels
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+
+# Streamlit
+.streamlit/
