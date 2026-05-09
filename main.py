@@ -16,7 +16,7 @@ load_dotenv()
 
 # ── Page config ────────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Qualification Prospect — Immobilier Luxe",
+    page_title="Prospect Qualification — Luxury Real Estate",
     page_icon="🏛",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -47,18 +47,6 @@ st.markdown(
         margin-top: 0.5rem;
     }
 
-    .history-card {
-        padding: 0.75rem 1rem;
-        border-radius: 8px;
-        border: 1px solid #E5E7EB;
-        margin-bottom: 0.5rem;
-        cursor: pointer;
-    }
-    .history-card-active {
-        border-color: #6366F1;
-        background: #EEF2FF;
-    }
-
     .chip-on  { background: #D1FAE5; color: #065F46; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; margin: 2px; display: inline-block; }
     .chip-off { background: #F3F4F6; color: #9CA3AF; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; margin: 2px; display: inline-block; }
 
@@ -74,43 +62,41 @@ st.markdown(
 
 # ── Constants ──────────────────────────────────────────────────────────────────
 PRIORITY_CONF = {
-    PriorityLevel.HIGH:   {"color": "#10B981", "bg": "#ECFDF5", "label": "PRIORITÉ HAUTE",   "score_color": "#10B981"},
-    PriorityLevel.MEDIUM: {"color": "#F59E0B", "bg": "#FFFBEB", "label": "PRIORITÉ MOYENNE", "score_color": "#F59E0B"},
-    PriorityLevel.LOW:    {"color": "#EF4444", "bg": "#FEF2F2", "label": "PRIORITÉ FAIBLE",  "score_color": "#EF4444"},
+    PriorityLevel.HIGH:   {"color": "#10B981", "bg": "#ECFDF5", "label": "HIGH PRIORITY"},
+    PriorityLevel.MEDIUM: {"color": "#F59E0B", "bg": "#FFFBEB", "label": "MEDIUM PRIORITY"},
+    PriorityLevel.LOW:    {"color": "#EF4444", "bg": "#FEF2F2", "label": "LOW PRIORITY"},
 }
 
 MATURITY_LABELS = {
-    "immediate":   "⚡ Immédiat — moins de 3 mois",
-    "short_term":  "📅 Court terme — 3 à 12 mois",
-    "medium_term": "🗓️ Moyen terme — 1 à 3 ans",
-    "long_term":   "🔭 Long terme — plus de 3 ans",
-    "undefined":   "❓ Non défini",
+    "immediate":   "⚡ Immediate — under 3 months",
+    "short_term":  "📅 Short term — 3 to 12 months",
+    "medium_term": "🗓️ Medium term — 1 to 3 years",
+    "long_term":   "🔭 Long term — over 3 years",
+    "undefined":   "❓ Undefined",
 }
 
 CONFIDENCE_LABELS = {
-    "high":   ("🟢", "Confiance haute"),
-    "medium": ("🟡", "Confiance moyenne"),
-    "low":    ("🔴", "Confiance faible"),
+    "high":   ("🟢", "High confidence — sufficient data"),
+    "medium": ("🟡", "Medium confidence — some data missing"),
+    "low":    ("🔴", "Low confidence — message too short or ambiguous"),
 }
 
 SIGNAL_LABELS = {
     "relocation":           "Relocation",
-    "investment":           "Investissement",
-    "primary_residence":    "Résidence principale",
-    "fiscal_optimization":  "Optimisation fiscale",
-    "inheritance":          "Héritage / Succession",
-    "divorce":              "Séparation",
-    "professional_project": "Projet professionnel",
-    "retirement":           "Retraite",
-    "other":                "Autre",
+    "investment":           "Investment",
+    "primary_residence":    "Primary residence",
+    "fiscal_optimization":  "Tax optimization",
+    "inheritance":          "Inheritance",
+    "divorce":              "Separation / Divorce",
+    "professional_project": "Professional project",
+    "retirement":           "Retirement",
+    "other":                "Other",
 }
 
 URGENCY_CLASS = {1: "urg-1", 2: "urg-2", 3: "urg-3"}
-URGENCY_LABEL = {1: "URGENT", 2: "PRIORITAIRE", 3: "STANDARD"}
+URGENCY_LABEL = {1: "URGENT", 2: "PRIORITY", 3: "STANDARD"}
 
 # ── Session state ──────────────────────────────────────────────────────────────
-# history: list of dicts {"result": ProspectScore, "name": str, "origin": str, "at": str}
-# selected_idx: which history entry is displayed in the detail view
 if "history" not in st.session_state:
     st.session_state.history = []
 if "selected_idx" not in st.session_state:
@@ -119,7 +105,6 @@ if "selected_idx" not in st.session_state:
 
 # ── Rendering helper ───────────────────────────────────────────────────────────
 def render_analysis(result: ProspectScore, prospect_name: str, origin: str) -> None:
-    """Render the full analysis detail for one prospect."""
     pconf = PRIORITY_CONF[result.priority_level]
     conf_icon, conf_label = CONFIDENCE_LABELS[result.confidence_level]
 
@@ -138,7 +123,7 @@ def render_analysis(result: ProspectScore, prospect_name: str, origin: str) -> N
                     <div style="font-size:3.5rem; font-weight:800; color:{pconf['color']}; line-height:1;">
                         {result.global_score}<span style="font-size:1.5rem; color:#9CA3AF;">/10</span>
                     </div>
-                    <div style="font-size:0.78rem; color:#6B7280; margin-top:4px;">SCORE DE QUALIFICATION</div>
+                    <div style="font-size:0.78rem; color:#6B7280; margin-top:4px;">QUALIFICATION SCORE</div>
                 </div>
             </div>
         </div>
@@ -147,7 +132,7 @@ def render_analysis(result: ProspectScore, prospect_name: str, origin: str) -> N
     )
 
     # Score breakdown
-    with st.expander("Détail du scoring par dimension", expanded=True):
+    with st.expander("Score breakdown by dimension", expanded=True):
         for dim in result.score_breakdown:
             cols = st.columns([2, 4, 1])
             with cols[0]:
@@ -165,19 +150,19 @@ def render_analysis(result: ProspectScore, prospect_name: str, origin: str) -> N
     with col_left:
         pos_col, att_col = st.columns(2)
         with pos_col:
-            st.markdown("#### Points positifs")
+            st.markdown("#### Positive signals")
             for signal in result.positive_signals:
                 st.success(signal, icon="✅")
         with att_col:
-            st.markdown("#### Points d'attention")
+            st.markdown("#### Attention points")
             if result.attention_points:
                 for point in result.attention_points:
                     st.warning(point, icon="⚠️")
             else:
-                st.markdown("*Aucun point d'attention majeur.*")
+                st.markdown("*No major attention points.*")
 
     with col_right:
-        st.markdown("#### Signaux faibles")
+        st.markdown("#### Weak signals")
         chips_html = ""
         for ws in result.weak_signals:
             label = SIGNAL_LABELS.get(ws.signal_type, ws.signal_type)
@@ -189,15 +174,15 @@ def render_analysis(result: ProspectScore, prospect_name: str, origin: str) -> N
                 chips_html += f'<span class="chip-off">{label}</span>'
         st.markdown(chips_html, unsafe_allow_html=True)
 
-        st.markdown("#### Maturité du projet")
+        st.markdown("#### Project maturity")
         st.info(MATURITY_LABELS[result.project_maturity])
 
-        st.markdown("#### Cohérence budgétaire")
+        st.markdown("#### Budget coherence")
         st.markdown(result.budget_coherence)
 
     st.markdown("---")
 
-    st.markdown("#### Actions recommandées")
+    st.markdown("#### Recommended actions")
     sorted_actions = sorted(result.recommended_actions, key=lambda a: a.priority)
     for action in sorted_actions:
         st.markdown(
@@ -210,7 +195,7 @@ def render_analysis(result: ProspectScore, prospect_name: str, origin: str) -> N
 
     st.markdown("---")
 
-    st.markdown("#### Points de conversation pour l'agent")
+    st.markdown("#### Agent talking points")
     for tp in result.agent_talking_points:
         st.markdown(f"→ {tp}")
 
@@ -218,22 +203,23 @@ def render_analysis(result: ProspectScore, prospect_name: str, origin: str) -> N
 
     # Export
     col_exp1, col_exp2, _ = st.columns([1, 1, 3])
+    sorted_actions_export = sorted(result.recommended_actions, key=lambda a: a.priority)
     summary_lines = [
-        f"Prospect : {prospect_name} — {origin}",
-        f"Score : {result.global_score}/10 — {result.priority_level.value}",
+        f"Prospect: {prospect_name} — {origin}",
+        f"Score: {result.global_score}/10 — {result.priority_level.value}",
         "",
-        "Points positifs :",
+        "Positive signals:",
         *[f"  ✓ {s}" for s in result.positive_signals],
         "",
-        "Points d'attention :",
+        "Attention points:",
         *[f"  ⚠ {p}" for p in result.attention_points],
         "",
-        "Actions recommandées :",
-        *[f"  [{URGENCY_LABEL[a.priority]}] {a.action} ({a.timing})" for a in sorted_actions],
+        "Recommended actions:",
+        *[f"  [{URGENCY_LABEL[a.priority]}] {a.action} ({a.timing})" for a in sorted_actions_export],
     ]
     with col_exp1:
         st.download_button(
-            label="Exporter JSON",
+            label="Export JSON",
             data=result.model_dump_json(indent=2),
             file_name=f"prospect_{prospect_name.replace(' ', '_')}.json",
             mime="application/json",
@@ -242,7 +228,7 @@ def render_analysis(result: ProspectScore, prospect_name: str, origin: str) -> N
         )
     with col_exp2:
         st.download_button(
-            label="Exporter texte",
+            label="Export text",
             data="\n".join(summary_lines),
             file_name=f"prospect_{prospect_name.replace(' ', '_')}.txt",
             mime="text/plain",
@@ -253,35 +239,36 @@ def render_analysis(result: ProspectScore, prospect_name: str, origin: str) -> N
 
 # ── Sidebar — input form ───────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("## 🏛 Qualification Prospect")
-    st.caption("Agence Immobilière de Luxe — Usage interne")
+    st.markdown("## 🏛 Prospect Qualification")
+    st.caption("Luxury Real Estate — Internal use only")
     st.divider()
 
     api_key_env = os.getenv("GROQ_API_KEY", "")
     if not api_key_env:
         api_key_input = st.text_input(
-            "Clé API Groq",
+            "Groq API Key",
             type="password",
             placeholder="gsk_...",
-            help="Ou définissez GROQ_API_KEY dans un fichier .env",
+            help="Or set GROQ_API_KEY in a .env file",
         )
     else:
         api_key_input = api_key_env
-        st.caption("✅ Clé API chargée depuis .env")
+        st.caption("✅ API key loaded from .env")
 
     st.divider()
 
     with st.form("prospect_form", clear_on_submit=False):
-        st.markdown("#### Dossier prospect")
+        st.markdown("#### Prospect file")
 
-        name = st.text_input("Nom complet *", placeholder="John Smith")
+        name = st.text_input("Full name *", placeholder="John Smith")
         geographic_origin = st.selectbox(
-            "Origine géographique *",
-            options=[e.value for e in GeographicOrigin],
+            "Geographic origin *",
+            options=list(GeographicOrigin),
             index=3,
+            format_func=lambda x: x.value,
         )
         declared_budget = st.number_input(
-            "Budget déclaré (€) *",
+            "Declared budget (€) *",
             min_value=100_000,
             max_value=100_000_000,
             step=50_000,
@@ -289,55 +276,56 @@ with st.sidebar:
             format="%d",
         )
         property_type = st.selectbox(
-            "Type de bien recherché *",
-            options=[e.value for e in PropertyType],
+            "Property type *",
+            options=list(PropertyType),
+            format_func=lambda x: x.value,
         )
 
-        st.markdown("#### Message initial")
+        st.markdown("#### Initial message")
         initial_message = st.text_area(
-            "Message verbatim *",
+            "Verbatim message *",
             height=180,
-            placeholder="Collez ici le message exact du prospect, tel qu'il l'a écrit...",
+            placeholder="Paste the prospect's exact message here...",
         )
 
-        st.markdown("#### Informations complémentaires")
+        st.markdown("#### Additional information")
         properties_raw = st.text_area(
-            "Biens consultés sur le site",
+            "Properties viewed on site",
             height=80,
-            placeholder="REF-001 — Villa Cannes 3.2M€\nREF-007 — App. Monaco 2.8M€",
-            help="Un bien par ligne",
+            placeholder="REF-001 — Villa Cannes €3.2M\nREF-007 — Apt. Monaco €2.8M",
+            help="One property per line",
         )
         portfolio = st.text_area(
-            "Portefeuille disponible (optionnel)",
+            "Available portfolio (optional)",
             height=80,
-            placeholder="Villa Les Pins — 3.2M€ — 5ch — piscine — Mougins\nApp. Carré d'Or — 2.1M€ — vue mer — Monaco",
-            help="Permet au modèle de suggérer des biens précis",
+            placeholder="Villa Les Pins — €3.2M — 5br — pool — Mougins\nApt. Carré d'Or — €2.1M — sea view — Monaco",
+            help="Allows the model to suggest specific properties",
         )
 
         submitted = st.form_submit_button(
-            "ANALYSER CE PROSPECT",
+            "ANALYSE PROSPECT",
             type="primary",
             use_container_width=True,
         )
 
     if st.session_state.history:
-        if st.button("Vider l'historique", use_container_width=True):
+        if st.button("Clear history", use_container_width=True):
             st.session_state.history = []
             st.session_state.selected_idx = 0
             st.rerun()
 
     st.divider()
-    st.caption("Modèle : llama-3.3-70b-versatile (Groq)")
+    st.caption("Model: llama-3.3-70b-versatile (Groq)")
 
 # ── Form processing ────────────────────────────────────────────────────────────
 if submitted:
     errors = []
     if not name.strip():
-        errors.append("Le nom du prospect est requis.")
+        errors.append("Prospect name is required.")
     if not initial_message.strip():
-        errors.append("Le message initial est requis.")
+        errors.append("Initial message is required.")
     if not api_key_input:
-        errors.append("La clé API Groq est requise.")
+        errors.append("Groq API key is required.")
 
     if errors:
         for e in errors:
@@ -351,26 +339,26 @@ if submitted:
 
         prospect = ProspectInput(
             name=name.strip(),
-            geographic_origin=GeographicOrigin(geographic_origin),
+            geographic_origin=geographic_origin,
             declared_budget=declared_budget,
-            property_type=PropertyType(property_type),
+            property_type=property_type,
             initial_message=initial_message.strip(),
             properties_consulted=properties_list,
             portfolio=portfolio.strip(),
         )
 
-        with st.spinner("Analyse en cours via Groq — llama-3.3-70b…"):
+        with st.spinner("Analysing via Groq — llama-3.3-70b…"):
             try:
                 result = score_prospect(prospect, api_key_input)
                 st.session_state.history.insert(0, {
                     "result": result,
                     "name": name.strip(),
-                    "origin": geographic_origin,
+                    "origin": geographic_origin.value,
                     "at": datetime.now().strftime("%H:%M"),
                 })
                 st.session_state.selected_idx = 0
             except Exception as exc:
-                st.error(f"Erreur lors de l'analyse : {exc}")
+                st.error(f"Analysis error: {exc}")
 
 # ── Main area ──────────────────────────────────────────────────────────────────
 if not st.session_state.history:
@@ -378,10 +366,10 @@ if not st.session_state.history:
         """
         <div style="text-align:center; padding:80px 20px; color:#9CA3AF;">
             <div style="font-size:3.5rem; margin-bottom:16px;">🏛</div>
-            <h3 style="color:#6B7280; font-weight:400;">Aucune analyse en cours</h3>
+            <h3 style="color:#6B7280; font-weight:400;">No analysis yet</h3>
             <p style="max-width:400px; margin:0 auto;">
-                Remplissez le formulaire dans la barre latérale et cliquez sur
-                <strong>Analyser ce prospect</strong> pour obtenir un scoring en 10 secondes.
+                Fill in the form in the sidebar and click
+                <strong>Analyse Prospect</strong> to get a score in 10 seconds.
             </p>
         </div>
         """,
@@ -393,7 +381,7 @@ else:
     # ── History bar ────────────────────────────────────────────────────────────
     n = len(history)
     if n > 1:
-        st.markdown(f"#### Historique de session — {n} prospect{'s' if n > 1 else ''} analysé{'s' if n > 1 else ''}")
+        st.markdown(f"#### Session history — {n} prospect{'s' if n > 1 else ''} analysed")
         cols = st.columns(min(n, 6))
         for i, entry in enumerate(history[:6]):
             pconf = PRIORITY_CONF[entry["result"].priority_level]
@@ -416,11 +404,11 @@ else:
                     unsafe_allow_html=True,
                 )
                 if not is_selected:
-                    if st.button("Voir", key=f"sel_{i}", use_container_width=True):
+                    if st.button("View", key=f"sel_{i}", use_container_width=True):
                         st.session_state.selected_idx = i
                         st.rerun()
         st.markdown("---")
 
-    # ── Detail view of selected prospect ──────────────────────────────────────
+    # ── Detail view ────────────────────────────────────────────────────────────
     entry = history[st.session_state.selected_idx]
     render_analysis(entry["result"], entry["name"], entry["origin"])

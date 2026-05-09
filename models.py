@@ -4,28 +4,28 @@ from enum import Enum
 
 
 class PropertyType(str, Enum):
-    APARTMENT = "Appartement"
-    HOUSE = "Maison / Villa"
+    APARTMENT = "Apartment"
+    HOUSE = "House / Villa"
     PENTHOUSE = "Penthouse / Duplex"
     CHALET = "Chalet"
-    CASTLE = "Château / Propriété de prestige"
-    LAND = "Terrain / Foncier"
-    COMMERCIAL = "Bien commercial / Investissement"
-    OTHER = "Autre"
+    CASTLE = "Estate / Prestige Property"
+    LAND = "Land / Plot"
+    COMMERCIAL = "Commercial / Investment Property"
+    OTHER = "Other"
 
 
 class GeographicOrigin(str, Enum):
-    LOCAL = "Local (même région)"
-    NATIONAL = "National (autre région)"
-    EUROPEAN = "Européen (UE)"
-    INTERNATIONAL = "International (hors UE)"
-    UNKNOWN = "Non précisé"
+    LOCAL = "Local (same region)"
+    NATIONAL = "National (other region)"
+    EUROPEAN = "European (EU)"
+    INTERNATIONAL = "International (non-EU)"
+    UNKNOWN = "Not specified"
 
 
 class PriorityLevel(str, Enum):
-    HIGH = "HAUTE"
-    MEDIUM = "MOYENNE"
-    LOW = "FAIBLE"
+    HIGH = "HIGH"
+    MEDIUM = "MEDIUM"
+    LOW = "LOW"
 
 
 class ProspectInput(BaseModel):

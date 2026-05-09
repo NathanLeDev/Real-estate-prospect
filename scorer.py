@@ -28,9 +28,9 @@ Ton rôle est d'analyser les informations d'un prospect entrant et de produire u
   Sérieux×0.25 + CapacitéFinancière×0.25 + MaturitéProjet×0.20 + QualitéEngagement×0.15 + CohérenceProfil×0.15
 
 **Mapping priorité** :
-  ≥ 8 → HAUTE (contact dans les 2h)
-  5–7 → MOYENNE (contact dans les 24h)
-  ≤ 4 → FAIBLE (séquence nurturing, pas d'appel immédiat)
+  ≥ 8 → HIGH (contact dans les 2h)
+  5–7 → MEDIUM (contact dans les 24h)
+  ≤ 4 → LOW (séquence nurturing, pas d'appel immédiat)
 
 ## SIGNAUX FAIBLES À DÉTECTER SYSTÉMATIQUEMENT
 - **relocation** : mutation professionnelle, déménagement international, expatriation
@@ -66,7 +66,7 @@ QUALIFICATION_TOOL = {
             },
             "priority_level": {
                 "type": "string",
-                "enum": ["HAUTE", "MOYENNE", "FAIBLE"],
+                "enum": ["HIGH", "MEDIUM", "LOW"],
                 "description": "Niveau de priorité pour l'agent",
             },
             "score_breakdown": {
