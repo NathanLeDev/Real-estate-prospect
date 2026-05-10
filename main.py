@@ -253,9 +253,6 @@ with st.sidebar:
         )
     else:
         api_key_input = api_key_env
-        st.caption("✅ API key loaded from .env")
-
-    st.divider()
 
     with st.form("prospect_form", clear_on_submit=False):
         st.markdown("#### Prospect file")
@@ -314,9 +311,6 @@ with st.sidebar:
             st.session_state.selected_idx = 0
             st.rerun()
 
-    st.divider()
-    st.caption("Model: llama-3.3-70b-versatile (Groq)")
-
 # ── Form processing ────────────────────────────────────────────────────────────
 if submitted:
     errors = []
@@ -347,7 +341,7 @@ if submitted:
             portfolio=portfolio.strip(),
         )
 
-        with st.spinner("Analysing via Groq — llama-3.3-70b…"):
+        with st.spinner("Analysing…"):
             try:
                 result = score_prospect(prospect, api_key_input)
                 st.session_state.history.insert(0, {
