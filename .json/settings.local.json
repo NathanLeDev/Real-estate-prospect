@@ -14,8 +14,9 @@
       "Bash(python -m py_compile models.py)",
       "Bash(python -c \"from scorer import score_prospect, GROQ_MODEL; print\\('scorer OK — modèle:', GROQ_MODEL\\)\")",
       "Bash(where streamlit:*)",
-      "Bash(python -m streamlit --version)",
-      "Bash(python3 -m streamlit --version)"
+      "Bash(python3 -m streamlit --version)",
+      "Bash(ls -la)",
+      "Bash(dir /b)"
     ]
   }
 }
