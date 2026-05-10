@@ -6,72 +6,72 @@ from models import ProspectInput, ProspectScore, PriorityLevel, ScoreDimension, 
 
 load_dotenv()
 
-SYSTEM_PROMPT = """Tu es un expert en qualification de prospects pour une agence immobilière de luxe (Monaco, Côte d'Azur, Paris 8e/16e).
+SYSTEM_PROMPT = """You are an expert in prospect qualification for a luxury real estate agency (Monaco, Côte d'Azur, Paris 8th/16th arrondissement).
 
-Ton rôle est d'analyser les informations d'un prospect entrant et de produire un scoring de qualité précis et actionnable pour l'agent immobilier.
+Your role is to analyze incoming prospect information and produce a precise, actionable quality score for the real estate agent.
 
-## FRAMEWORK DE SCORING — 5 dimensions, chacune notée de 0 à 10
+## SCORING FRAMEWORK — 5 dimensions, each scored from 0 to 10
 
-1. **SÉRIEUX** : Spécificité de la demande, marqueurs d'urgence, ton professionnel, profondeur des questions. Un message vague ou touristique score bas.
+1. **SERIOUSNESS**: Specificity of the request, urgency markers, professional tone, depth of questions. A vague or tourist-like message scores low.
 
-2. **CAPACITÉ FINANCIÈRE** : Cohérence entre le budget déclaré et les biens consultés. Un prospect déclarant 800k€ mais ne consultant que des biens à 2M€+ score bas. Des questions précises sur le financement score haut.
+2. **FINANCIAL CAPACITY**: Coherence between the declared budget and the properties viewed. A prospect declaring €800k but only viewing €2M+ properties scores low. Precise questions about financing score high.
 
-3. **MATURITÉ DU PROJET** : Signaux de délai concret (mutation en septembre, inscription scolaire), déclencheurs de vie (déménagement, divorce, héritage), critères de localisation précis vs "quelque chose de beau sur la côte".
+3. **PROJECT MATURITY**: Concrete timeline signals (job transfer in September, school enrollment), life triggers (relocation, divorce, inheritance), precise location criteria vs. "something nice on the coast".
 
-4. **QUALITÉ D'ENGAGEMENT** : Biens consultés sur le site (quantité, cohérence avec la demande), longueur et personnalisation du message, questions spécifiques sur des biens précis.
+4. **ENGAGEMENT QUALITY**: Properties viewed on the site (quantity, consistency with the request), length and personalization of the message, specific questions about particular properties.
 
-5. **COHÉRENCE DU PROFIL** : Consistance entre l'origine géographique, le budget, le type de bien. Est-ce que tout s'aligne ?
+5. **PROFILE COHERENCE**: Consistency between geographic origin, budget, and property type. Does everything align?
 
-**agent_intermediaire** : la demande vient d'un représentant, assistant, ou agent mandaté. Signal de sérieux élevé dans le luxe.
+**agent_intermediaire**: the request comes from a representative, assistant, or mandated agent. High seriousness signal in luxury real estate.
 
-**Score global** = moyenne pondérée :
-  Sérieux×0.25 + CapacitéFinancière×0.25 + MaturitéProjet×0.20 + QualitéEngagement×0.15 + CohérenceProfil×0.15
+**Global score** = weighted average:
+  Seriousness×0.25 + FinancialCapacity×0.25 + ProjectMaturity×0.20 + EngagementQuality×0.15 + ProfileCoherence×0.15
 
-**Mapping priorité** :
-  ≥ 8 → HIGH (contact dans les 2h)
-  5–7 → MEDIUM (contact dans les 24h)
-  ≤ 4 → LOW (séquence nurturing, pas d'appel immédiat)
+**Priority mapping**:
+  ≥ 8 → HIGH (contact within 2 hours)
+  5–7 → MEDIUM (contact within 24 hours)
+  ≤ 4 → LOW (nurturing sequence, no immediate call)
 
-## SIGNAUX FAIBLES À DÉTECTER SYSTÉMATIQUEMENT
-- **relocation** : mutation professionnelle, déménagement international, expatriation
-- **investment** : questions sur le rendement locatif, diversification de portefeuille, "pour mes enfants"
-- **primary_residence** : école, quartier, vie locale, transport domicile-travail
-- **fiscal_optimization** : LMNP, SCI, IFI, résidence Monaco, fiscalité non-résident, optimisation patrimoniale
-- **inheritance** : "bien de famille", succession, liquidation de patrimoine
-- **divorce** : urgence soudaine, décision solo dans un contexte de couple, "ma situation a changé"
-- **professional_project** : usage commercial, local professionnel, signal entrepreneur visible
-- **retirement** : "profiter de la vie", rythme de vie plus lent, projet de retraite
+## WEAK SIGNALS TO SYSTEMATICALLY DETECT
+- **relocation**: job transfer, international relocation, expatriation
+- **investment**: questions about rental yield, portfolio diversification, "for my children"
+- **primary_residence**: school, neighborhood, local lifestyle, home-to-work commute
+- **fiscal_optimization**: LMNP, SCI, IFI, Monaco residency, non-resident taxation, wealth optimization
+- **inheritance**: "family property", succession, asset liquidation
+- **divorce**: sudden urgency, solo decision in a couple's context, "my situation has changed"
+- **professional_project**: commercial use, professional premises, visible entrepreneur signal
+- **retirement**: "enjoying life", slower lifestyle, retirement project
 
-## RÈGLES CRITIQUES
-- Ne jamais inventer d'informations absentes du dossier.
-- Si une information est manquante, la signaler dans les points d'attention.
-- L'analyse budget_coherence doit mentionner l'écart en euros si détectable.
-- Les recommended_actions doivent être concrètes et immédiatement actionnables.
-- Les agent_talking_points doivent être personnalisés à CE prospect spécifique.
-- Sois factuel, direct, sans fioritures. L'agent lit ça en 10 secondes."""
+## CRITICAL RULES
+- Never invent information absent from the file.
+- If information is missing, flag it in the attention points.
+- The budget_coherence analysis must mention the gap in euros if detectable.
+- recommended_actions must be concrete and immediately actionable.
+- agent_talking_points must be personalized to THIS specific prospect.
+- Be factual, direct, no fluff. The agent reads this in 10 seconds."""
 
 QUALIFICATION_TOOL = {
     "type": "function",
     "function": {
     "name": "qualify_prospect",
-    "description": "Qualifie un prospect immobilier luxe et retourne un scoring structuré avec recommandations actionnables",
+    "description": "Qualifies a luxury real estate prospect and returns a structured score with actionable recommendations",
     "parameters": {
         "type": "object",
         "properties": {
             "global_score": {
                 "type": "integer",
-                "description": "Score global de qualification de 1 à 10",
+                "description": "Overall qualification score from 1 to 10",
                 "minimum": 1,
                 "maximum": 10,
             },
             "priority_level": {
                 "type": "string",
                 "enum": ["HIGH", "MEDIUM", "LOW"],
-                "description": "Niveau de priorité pour l'agent",
+                "description": "Priority level for the agent",
             },
             "score_breakdown": {
                 "type": "array",
-                "description": "Détail du scoring par dimension (exactement 5 dimensions)",
+                "description": "Score breakdown by dimension (exactly 5 dimensions)",
                 "items": {
                     "type": "object",
                     "properties": {
@@ -84,17 +84,17 @@ QUALIFICATION_TOOL = {
             },
             "positive_signals": {
                 "type": "array",
-                "description": "Signaux positifs détectés — au moins 1",
+                "description": "Detected positive signals — at least 1",
                 "items": {"type": "string"},
             },
             "attention_points": {
                 "type": "array",
-                "description": "Points d'attention, signaux négatifs ou informations manquantes — au moins 1",
+                "description": "Attention points, negative signals or missing information — at least 1",
                 "items": {"type": "string"},
             },
             "weak_signals": {
                 "type": "array",
-                "description": "Analyse des 8 signaux faibles standardisés",
+                "description": "Analysis of the 8 standardized weak signals",
                 "items": {
                     "type": "object",
                     "properties": {
@@ -115,7 +115,7 @@ QUALIFICATION_TOOL = {
                         "detected": {"type": "boolean"},
                         "evidence": {
                             "type": "string",
-                            "description": "Citation ou paraphrase du message qui justifie la détection",
+                            "description": "Quote or paraphrase from the message that justifies the detection",
                         },
                     },
                     "required": ["signal_type", "detected", "evidence"],
@@ -123,16 +123,16 @@ QUALIFICATION_TOOL = {
             },
             "budget_coherence": {
                 "type": "string",
-                "description": "Analyse de la cohérence entre budget déclaré et biens consultés, avec écart en euros si applicable",
+                "description": "Analysis of the coherence between declared budget and properties viewed, with gap in euros if applicable",
             },
             "project_maturity": {
                 "type": "string",
                 "enum": ["immediate", "short_term", "medium_term", "long_term", "undefined"],
-                "description": "immediate=<3 mois, short_term=3-12 mois, medium_term=1-3 ans, long_term=3+ ans",
+                "description": "immediate=<3 months, short_term=3-12 months, medium_term=1-3 years, long_term=3+ years",
             },
             "recommended_actions": {
                 "type": "array",
-                "description": "Actions concrètes et immédiates pour l'agent — au moins 1",
+                "description": "Concrete and immediate actions for the agent — at least 1",
                 "items": {
                     "type": "object",
                     "properties": {
@@ -142,7 +142,7 @@ QUALIFICATION_TOOL = {
                             "type": "integer",
                             "minimum": 1,
                             "maximum": 3,
-                            "description": "1=urgent, 2=normal, 3=faible",
+                            "description": "1=urgent, 2=normal, 3=low",
                         },
                     },
                     "required": ["action", "timing", "priority"],
@@ -150,13 +150,13 @@ QUALIFICATION_TOOL = {
             },
             "agent_talking_points": {
                 "type": "array",
-                "description": "Points de conversation personnalisés à ce prospect — au moins 2",
+                "description": "Talking points personalized to this prospect — at least 2",
                 "items": {"type": "string"},
             },
             "confidence_level": {
                 "type": "string",
                 "enum": ["high", "medium", "low"],
-                "description": "Niveau de confiance de l'analyse (low si données insuffisantes)",
+                "description": "Confidence level of the analysis (low if data is insufficient)",
             },
         },
         "required": [
@@ -179,25 +179,25 @@ QUALIFICATION_TOOL = {
 
 def _build_user_prompt(prospect: ProspectInput) -> str:
     parts = [
-        "=== DOSSIER PROSPECT ===",
-        f"Nom : {prospect.name}",
-        f"Origine géographique : {prospect.geographic_origin.value}",
-        f"Budget déclaré : {prospect.declared_budget:,.0f} €",
-        f"Type de bien recherché : {prospect.property_type.value}",
+        "=== PROSPECT FILE ===",
+        f"Name: {prospect.name}",
+        f"Geographic origin: {prospect.geographic_origin.value}",
+        f"Declared budget: {prospect.declared_budget:,.0f} €",
+        f"Property type sought: {prospect.property_type.value}",
         "",
-        "=== MESSAGE INITIAL (verbatim) ===",
+        "=== INITIAL MESSAGE (verbatim) ===",
         f'"""{prospect.initial_message}"""',
     ]
 
     if prospect.properties_consulted:
-        parts += ["", "=== BIENS CONSULTÉS SUR LE SITE ==="]
+        parts += ["", "=== PROPERTIES VIEWED ON THE SITE ==="]
         for p in prospect.properties_consulted:
             parts.append(f"  • {p}")
     else:
-        parts += ["", "=== BIENS CONSULTÉS SUR LE SITE ===", "Aucun bien consulté enregistré."]
+        parts += ["", "=== PROPERTIES VIEWED ON THE SITE ===", "No properties viewed recorded."]
 
     if prospect.portfolio:
-        parts += ["", "=== PORTEFEUILLE DISPONIBLE (fourni par l'agent) ===", prospect.portfolio]
+        parts += ["", "=== AVAILABLE PORTFOLIO (provided by agent) ===", prospect.portfolio]
 
     return "\n".join(parts)
 
@@ -207,12 +207,12 @@ GROQ_MODEL = "llama-3.3-70b-versatile"
 
 def score_prospect(prospect: ProspectInput, api_key: str | None = None) -> ProspectScore:
     """
-    Appelle Groq (llama-3.3-70b-versatile) via function calling pour obtenir un scoring structuré.
-    Lève ValueError si l'API échoue ou si la réponse est invalide.
+    Calls Groq (llama-3.3-70b-versatile) via function calling to obtain a structured score.
+    Raises ValueError if the API fails or the response is invalid.
     """
     key = api_key or os.getenv("GROQ_API_KEY")
     if not key:
-        raise ValueError("Clé API Groq manquante. Définissez GROQ_API_KEY dans .env ou saisissez-la dans l'interface.")
+        raise ValueError("Groq API key missing. Set GROQ_API_KEY in .env or enter it in the interface.")
 
     client = Groq(api_key=key)
 
@@ -229,7 +229,7 @@ def score_prospect(prospect: ProspectInput, api_key: str | None = None) -> Prosp
 
     tool_calls = response.choices[0].message.tool_calls
     if not tool_calls:
-        raise ValueError("Groq n'a pas retourné de résultat structuré.")
+        raise ValueError("Groq did not return a structured result.")
 
     data = json.loads(tool_calls[0].function.arguments)
 
